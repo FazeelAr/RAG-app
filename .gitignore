@@ -9,3 +9,11 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+
+## data files
+data/vector_db/chroma_db/*
+!data/vector_db/chroma_db/.gitkeep
+data/vector_db/*.bin
+data/vector_db/*.sqlite*
+data/vector_db/*.log
