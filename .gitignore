@@ -1,19 +1,23 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.pyc
+*.pyo
+*.pyd
 
-# Virtual environments
-.venv
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Environment variables
 .env
 
+# Streamlit
+.streamlit/
 
-## data files
-data/vector_db/chroma_db/*
-!data/vector_db/chroma_db/.gitkeep
-data/vector_db/*.bin
-data/vector_db/*.sqlite*
-data/vector_db/*.log
+# ChromaDB
+data/vector_db/chroma_db
+*.bin
+*.parquet
+*.sqlite
+*.sqlite3
