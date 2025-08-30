@@ -2,79 +2,102 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import streamlit as st
-import tempfile
+from datetime import datetime
 
+from src.document_processor import DocumentProcessor
+from src.vector_store import VectorStore
+from src.qa_chain import QAChain
+from components.styling import apply_custom_css
+from components.ui_helpers import (
+    render_header, render_sidebar, render_upload_section,
+    render_question_section, render_stats, render_answer,
+    render_footer
+)
+from config.app_config import AppConfig
 import asyncio
 
-# 🔧 Ensure event loop exists for Streamlit thread
 try:
     asyncio.get_running_loop()
-except RuntimeError:
+except:
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain_google_genai import GoogleGenerativeAI
-
-from langchain.globals import set_verbose
-
-# Enable verbose mode
-set_verbose(True)
-
-st.title("RAG powered AI application")
-
-uploaded_files = st.file_uploader(
-    label="Upload PDF files",
-    type="pdf",
-    accept_multiple_files=True
+# Page configuration
+st.set_page_config(
+    page_title="AI Document Assistant",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
+# Apply custom styling
+apply_custom_css()
+
+# Initialize session state
+if 'session_stats' not in st.session_state:
+    st.session_state.session_stats = {
+        'documents_processed': 0,
+        'questions_asked': 0,
+        'session_start': datetime.now()
+    }
+
+# Initialize components
+doc_processor = DocumentProcessor()
+vector_store = VectorStore()
+qa_chain = QAChain()
+
+# Render header
+render_header()
+
+# Render sidebar
+chunk_size, chunk_overlap, temperature = render_sidebar()
+
+# Main content area
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    uploaded_files = render_upload_section()
+
+with col2:
+    query, ask_button, clear_button = render_question_section(uploaded_files)
+
+# Process documents
 all_docs = []
 
 if uploaded_files:
-    for uploaded_file in uploaded_files:
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
-            temp_file.write(uploaded_file.read())
-            temp_path = temp_file.name
-
-        loader = PyPDFLoader(temp_path)
-        docs = loader.load()
-        all_docs.extend(docs)
-
-    st.write(f"Loaded {len(all_docs)} pages from {len(uploaded_files)} PDFs.")
-
-    # Split docs
-    text_splitter = CharacterTextSplitter(chunk_size=800, chunk_overlap=0)
-    documents = text_splitter.split_documents(all_docs)
-
-    # Embedding model
-    embedding_model = GoogleGenerativeAIEmbeddings(model='models/gemini-embedding-001')
-
-    # Vector DB
-    db = Chroma.from_documents(documents, embedding_model)
+    # Process uploaded files
+    all_docs = doc_processor.process_files(uploaded_files)
     
-
-    # Initialize LLM
-    llm = GoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
-
-    # Create RAG chain
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=db.as_retriever(),
-        return_source_documents=True
-    )
-
-    query = st.text_input("Enter your question")
-
-    if query:
-        result = qa_chain.invoke({"query": query})
+    # Update session stats
+    st.session_state.session_stats['documents_processed'] = len(uploaded_files)
+    
+    # Render statistics
+    render_stats(uploaded_files, all_docs)
+    
+    # Build vector database
+    with st.spinner('🧠 Building knowledge base...'):
+        documents = doc_processor.split_documents(all_docs, chunk_size, chunk_overlap)
+        db = vector_store.create_database(documents)
+        qa_chain_instance = qa_chain.create_chain(db, temperature)
+    
+    st.success("✅ Documents processed successfully! You can now ask questions.")
+    
+    # Handle question answering
+    if query and (ask_button or query):
+        st.session_state.session_stats['questions_asked'] += 1
         
-        # Show answer
-        st.write("**Answer:**", result["result"])
-        
-        # Show sources
-        for i, doc in enumerate(result["source_documents"], 1):
-            st.write(f"**Source {i}:** {doc.page_content[:300]}...")
+        with st.spinner('🤔 Thinking...'):
+            try:
+                result = qa_chain_instance.invoke({"query": query})
+                render_answer(result)
+                
+            except Exception as e:
+                st.error(f"❌ An error occurred: {str(e)}")
+                st.info("Please try rephrasing your question or check your documents.")
+
+    # Clear functionality
+    if clear_button:
+        st.session_state.clear()
+        st.rerun()
+
+# Render footer
+render_footer()
