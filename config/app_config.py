@@ -1,5 +1,13 @@
 import os
 from dotenv import load_dotenv
+import streamlit as st
+import os
+
+# Access the secret
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+
+# Optional: set as environment variable if your code expects it
+os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
 # Load environment variables
 load_dotenv()

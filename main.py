@@ -1,7 +1,10 @@
 from dotenv import load_dotenv
-load_dotenv()
-
 import streamlit as st
+import os
+
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+os.environ['GOOGLE_API_KEY'] = GOOGLE_API_KEY
+
 from datetime import datetime
 
 from src.document_processor import DocumentProcessor
