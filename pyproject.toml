@@ -11,4 +11,5 @@ dependencies = [
     "langchain-core>=0.3.75",
     "pypdf>=6.0.0",
     "streamlit>=1.49.0",
+    "pysqlite3-binary",
 ]
