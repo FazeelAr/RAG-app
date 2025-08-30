@@ -36,7 +36,7 @@ class VectorStore:
             Chroma vector database instance
         """
         db = Chroma(
-            persist_directory=self.db_config.CHROMA_DB_PATH,
+            persist_directory=None,
             embedding_function=self.embedding_model
         )
         return db
