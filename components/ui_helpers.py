@@ -181,7 +181,6 @@ def render_footer():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666; padding: 2rem;'>
-        <p>🚀 Powered by LangChain, Google Gemini, and Streamlit</p>
-        <p>Built with ❤️ for intelligent document analysis</p>
+        <p>⚡ Powered by LangChain, Google Gemini, and Streamlit</p>
     </div>
     """, unsafe_allow_html=True)
