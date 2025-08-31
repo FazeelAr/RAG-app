@@ -1,4 +1,3 @@
-
 ### Project Title
 
 **RAG-app** – Your chill AI buddy for retrieval-augmented generation, running smooth on Streamlit
@@ -11,21 +10,27 @@ RAG-app is your dope Streamlit-based RAG system that lets you build slick AI app
 
 ---
 
+### Live Demo
+
+👉 [Try it here on Streamlit Cloud](https://fazeelar-rag-app.streamlit.app/)
+
+---
+
 ### Features
 
 * **Streamlit-powered UI** — Frontend that’s fast, clean, and hella user-friendly.
 * **Retrieval + Generation** — Combines vector retrieval (Chroma, FAISS, etc.) with LLMs to answer smartly.
-* **Flexible vector backend** — Easily switch between different vector stores (Chroma if you install `chromadb`, or fallback to FAISS).
-* **Cloud-native** — Deploys out-of-the-box on Streamlit Community Cloud with your lock file.
+* **Flexible vector backend** — Easily switch between different vector stores.
+* **Cloud-native** — Deploys out-of-the-box on Streamlit Community Cloud.
 * **Simple environment setup** — Manage dependencies with `uv`, `pyproject.toml`, or your preferred method.
 
 ---
 
 ### Prereqs
 
-* Python 3.12 (same as in logs)
+* Python 3.12
 * Use `uv` (preferred), or `pip` / `poetry`
-* Optional: `chromadb` if you want Chroma; otherwise, Python's built-in `sqlite3` or FAISS will work.
+* Optional: `chromadb` if you want Chroma; otherwise, Python’s built-in `sqlite3` or FAISS will work.
 
 ---
 
@@ -63,51 +68,39 @@ RAG-app is your dope Streamlit-based RAG system that lets you build slick AI app
    streamlit run main.py
    ```
 
-5. Open the UI in your browser, drag docs, ask questions, and let the LLM do its magic.
+5. Open the UI in your browser, upload docs, ask questions, and let the LLM do its magic.
 
 ---
 
 ### Project Structure
 
-| Folder/File                                     | Purpose                                                                       |
-| ----------------------------------------------- | ----------------------------------------------------------------------------- |
-| `main.py`                                       | Entry point—sets up Streamlit UI and triggers the ingestion+LLM flow.         |
-| `src/`                                          | Core logic like `vector_store.py`, data loading, and RAG orchestration.       |
-| `config/`, `data/`                              | Optional zones for storing configs or sample data; tweak as per your setup.   |
-| `.devcontainer/`                                | Setup for reproducible dev environment (VS Code friendly!).                   |
-| `uv.lock`, `requirements.txt`, `pyproject.toml` | Dependency management tools. Keep one consistent method—`uv.lock` is default. |
+| Folder/File                                     | Purpose                                                                 |
+| ----------------------------------------------- | ----------------------------------------------------------------------- |
+| `main.py`                                       | Entry point—sets up Streamlit UI and triggers the ingestion+LLM flow.   |
+| `src/`                                          | Core logic like `vector_store.py`, data loading, and RAG orchestration. |
+| `config/`, `data/`                              | Optional zones for configs or sample data.                              |
+| `.devcontainer/`                                | Setup for reproducible dev environment (VS Code friendly).              |
+| `uv.lock`, `requirements.txt`, `pyproject.toml` | Dependency management files.                                            |
 
 ---
 
 ### Tips & Best Practices
 
-* If `pysqlite3` causes headaches (like missing Windows wheels), just use:
+* If `pysqlite3` causes issues on Windows, just use:
 
   ```python
   import sqlite3
   ```
-
-  Works everywhere, no stress.
-
-* Want to switch to FAISS? In your vector setup:
+* Prefer FAISS if you want a dependency-light vector DB:
 
   ```python
   from langchain_community.vectorstores import FAISS
-  ```
-
-  It's zero-dependency and cloud-friendly.
-
-* Lock file clutter? Clean up by:
-
-  ```bash
-  uv remove problematic-package
-  uv add chromadb  # for vector persistence
   ```
 
 ---
 
 ### Why RAG-app?
 
-Because generative AI is cooler when it's grounded in your own data. This repo is your launchpad—super customizable, perfectly so for research tools, chatbots with memory, or knowledge assistants.
+Because generative AI is cooler when it’s grounded in your own data. This repo is your launchpad — customizable, research-ready, and deployable.
 
-Share it, remix it, deploy it — and watch AI get way smarter.
+Play with it here 👉 [fazeelar-rag-app.streamlit.app](https://fazeelar-rag-app.streamlit.app/)
