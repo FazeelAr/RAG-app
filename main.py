@@ -1,6 +1,9 @@
+import subprocess
+import sys
+from pathlib import Path
+
 try:
     import pysqlite3
-    import sys
     sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 except ImportError:
     import sqlite3
@@ -10,14 +13,19 @@ from dotenv import load_dotenv
 import streamlit as st
 import os
 
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-os.environ['GOOGLE_API_KEY'] = GOOGLE_API_KEY
-
 from datetime import datetime
+
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+if __name__ == "__main__" and get_script_run_ctx(suppress_warning=True) is None:
+    script_path = Path(__file__).resolve()
+    subprocess.run([sys.executable, "-m", "streamlit", "run", str(script_path)], check=False)
+    sys.exit(0)
 
 from src.document_processor import DocumentProcessor
 from src.vector_store import VectorStore
 from src.qa_chain import QAChain
+from config.app_config import get_google_api_key
 from components.styling import apply_custom_css
 from components.ui_helpers import (
     render_header, render_sidebar, render_upload_section,
@@ -31,6 +39,10 @@ try:
     asyncio.get_running_loop()
 except:
     asyncio.set_event_loop(asyncio.new_event_loop())
+
+GOOGLE_API_KEY = get_google_api_key()
+if GOOGLE_API_KEY:
+    os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
 # Page configuration
 st.set_page_config(

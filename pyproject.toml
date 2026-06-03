@@ -8,9 +8,11 @@ dependencies = [
     "chroma>=0.2.0",
     "langchain[google-genai]>=0.3.27",
     "langchain-community>=0.3.29",
+    "langchain-huggingface>=0.3.1",
     "langchain-core>=0.3.75",
     "pypdf>=6.0.0",
     "streamlit>=1.49.0",
     "chromadb>=1.0.20",
+    "sentence-transformers>=5.5.1",
 ]
 

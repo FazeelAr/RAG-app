@@ -13,7 +13,8 @@ class DatabaseConfig:
         
         # Chroma database settings
         self.CHROMA_DB_PATH = str(self.VECTOR_DB_DIR / "chroma_db")
-        self.EMBEDDING_MODEL = "models/gemini-embedding-001"
+        self.EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+        self.EMBEDDING_DEVICE = "cpu"
         
         # Create directories if they don't exist
         self._create_directories()

@@ -1,4 +1,6 @@
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import uuid
+
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from config.db_config import DatabaseConfig
 
@@ -7,8 +9,11 @@ class VectorStore:
     
     def __init__(self):
         self.db_config = DatabaseConfig()
-        self.embedding_model = GoogleGenerativeAIEmbeddings(
-            model=self.db_config.EMBEDDING_MODEL
+        self.collection_name = f"{self.db_config.COLLECTION_NAME}_{uuid.uuid4().hex}"
+        self.embedding_model = HuggingFaceEmbeddings(
+            model_name=self.db_config.EMBEDDING_MODEL,
+            model_kwargs={"device": self.db_config.EMBEDDING_DEVICE},
+            encode_kwargs={"normalize_embeddings": True},
         )
     
     def create_database(self, documents):
@@ -24,7 +29,8 @@ class VectorStore:
         db = Chroma.from_documents(
             documents, 
             self.embedding_model, 
-            persist_directory=self.db_config.CHROMA_DB_PATH
+            persist_directory=self.db_config.CHROMA_DB_PATH,
+            collection_name=self.collection_name,
         )
         return db
     
@@ -36,8 +42,9 @@ class VectorStore:
             Chroma vector database instance
         """
         db = Chroma(
-            persist_directory=None,
-            embedding_function=self.embedding_model
+            persist_directory=self.db_config.CHROMA_DB_PATH,
+            embedding_function=self.embedding_model,
+            collection_name=self.collection_name,
         )
         return db
     
@@ -67,9 +74,13 @@ class VectorStore:
         return db.similarity_search(query, k=k)
     
     def delete_database(self):
-        """Delete the vector database."""
-        import shutil
-        import os
-        
-        if os.path.exists(self.db_config.CHROMA_DB_PATH):
-            shutil.rmtree(self.db_config.CHROMA_DB_PATH)
+        """Delete the active collection without removing the persisted Chroma directory."""
+        try:
+            db = Chroma(
+                persist_directory=self.db_config.CHROMA_DB_PATH,
+                embedding_function=self.embedding_model,
+                collection_name=self.collection_name,
+            )
+            db.delete_collection()
+        except Exception:
+            pass

@@ -1,28 +1,39 @@
 import os
+
 from dotenv import load_dotenv
 import streamlit as st
-import os
 
-# Access the secret
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
-# Optional: set as environment variable if your code expects it
-os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
+load_dotenv(override=True)
 
-# Load environment variables
-load_dotenv()
+
+def get_google_api_key() -> str:
+    """Return the Gemini API key from the environment, falling back to Streamlit secrets."""
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if api_key:
+        return api_key
+
+    try:
+        api_key = st.secrets.get("GOOGLE_API_KEY")
+    except Exception:
+        api_key = None
+
+    if api_key:
+        os.environ["GOOGLE_API_KEY"] = api_key
+
+    return api_key or ""
 
 class AppConfig:
     """Application configuration settings."""
     
     def __init__(self):
         # API Keys
-        self.GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+        self.GOOGLE_API_KEY = get_google_api_key()
         if not self.GOOGLE_API_KEY:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
         
         # LLM Settings
-        self.LLM_MODEL = "gemini-1.5-flash"
+        self.LLM_MODEL = "gemini-2.5-flash"
         self.DEFAULT_TEMPERATURE = 0.1
         self.MAX_TOKENS = 2048
         
